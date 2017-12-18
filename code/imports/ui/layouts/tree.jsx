@@ -13,14 +13,25 @@ class Tree extends Component {
       features: props.features,
     };
   }
-  
+
   componentWillReceiveProps(nextProps) {
     this.setState({
-      features: nextProps.features
+      features: nextProps.features,
     });
   }
 
   render() {
+    const alertNodeInfo = ({ node, path, treeIndex }) => {
+      const objectString = Object.keys(node)
+        .map(k => (k === 'children' ? 'children: Array' : `${k}: '${node[k]}'`))
+        .join(',\n   ');
+
+      global.alert('Info passed to the button generator:\n\n' +
+          `node: {\n   ${objectString}\n},\n` +
+          `path: [${path.join(', ')}],\n` +
+          `treeIndex: ${treeIndex}`);
+    };
+
     return (
       <div style={{ height: 400 }}>
         <SortableTree
@@ -29,6 +40,16 @@ class Tree extends Component {
             this.setState({features});
             console.log("treeData is", features);
           }}
+          generateNodeProps={rowInfo => ({
+            buttons: [
+              <button
+                style={{ verticalAlign: 'middle' }}
+                onClick={() => alertNodeInfo(rowInfo)}
+              >
+                i
+              </button>,
+            ],
+          })}
         />
       </div>
     );
