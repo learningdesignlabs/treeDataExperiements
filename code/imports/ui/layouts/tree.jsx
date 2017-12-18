@@ -10,21 +10,24 @@ class Tree extends Component {
     super(props);
 
     this.state = {
-      treeData: [
-        { title: 'Dog',children: [{title: 'puppy'}]},
-      ],
+      features: props.features,
     };
-
+  }
+  
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      features: nextProps.features
+    });
   }
 
   render() {
     return (
       <div style={{ height: 400 }}>
         <SortableTree
-          treeData={this.props.features}
-          onChange={(treeData) => {
-            this.setState({treeData});
-            console.log("treeData is", treeData);
+          treeData={this.state.features}
+          onChange={(features) => {
+            this.setState({features});
+            console.log("treeData is", features);
           }}
         />
       </div>
@@ -37,8 +40,6 @@ class Tree extends Component {
 //
 export default withTracker(() => {
   Meteor.subscribe('features');
-
-  return {
-    features: Features.find({}).fetch(),
-  };
+  const features = Features.find({}).fetch();
+  return { features };
 })(Tree);
