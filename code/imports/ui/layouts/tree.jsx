@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Meteor } from 'meteor/meteor';
 import { withTracker } from 'meteor/react-meteor-data';
-import SortableTree from 'react-sortable-tree';
+import SortableTree, { getFlatDataFromTree } from 'react-sortable-tree';
 
 import { Features } from '/imports/api/Features/features.js';
 
@@ -21,6 +21,7 @@ class Tree extends Component {
   }
 
   render() {
+    // function to build alert node data and pass to global alert method
     const alertNodeInfo = ({ node, path, treeIndex }) => {
       const objectString = Object.keys(node)
         .map(k => (k === 'children' ? 'children: Array' : `${k}: '${node[k]}'`))
@@ -31,9 +32,30 @@ class Tree extends Component {
           `path: [${path.join(', ')}],\n` +
           `treeIndex: ${treeIndex}`);
     };
+    // flat data variable using the getFlatDataFromTree function passed to input value on line 55.
+    const flatData = getFlatDataFromTree({
+      treeData: this.state.features,
+      getNodeKey: ({ node }) => node.id,
+      ignoreCollapsed: false,
+    }).map(({ node, path }, index) => ({
+      id: node._id,
+      title: node.title,
+      order: index,
+      subtitle: node.subtitle,
+      details: node.details,
+      parent: path.length > 1 ? path[path.length - 2] : null,
+    }));
 
     return (
-      <div style={{ height: 400 }}>
+      <div style={{ height: 800 }}>
+        <div>
+          <input
+            style={{ width: '100%' }}
+            type="text"
+            value={JSON.stringify(flatData)}
+            readOnly
+          />
+        </div>
         <SortableTree
           treeData={this.state.features}
           onChange={(features) => {
@@ -56,11 +78,15 @@ class Tree extends Component {
   }
 }
 
-// Export default is how we set the props of the
-// Tree component
-//
+// create a container using withTracker to pass the features Collection
+// as a props to the Tree component
 export default withTracker(() => {
-  Meteor.subscribe('features');
-  const features = Features.find({}).fetch();
-  return { features };
+  const featuresHandle = Meteor.subscribe('features');
+  const loading = !featuresHandle.ready();
+  const featuresExists = !loading;
+  return {
+    loading,
+    featuresExists,
+    features: featuresExists ? Features.find().fetch() : [],
+  };
 })(Tree);
