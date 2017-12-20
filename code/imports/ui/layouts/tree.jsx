@@ -59,8 +59,8 @@ class Tree extends Component {
         <SortableTree
           treeData={this.state.features}
           onChange={(features) => {
-            this.setState({features});
-            console.log("treeData is", features);
+            this.setState({ features });
+            // console.log('treeData is', features);
           }}
           generateNodeProps={rowInfo => ({
             buttons: [
@@ -73,6 +73,7 @@ class Tree extends Component {
             ],
           })}
         />
+
       </div>
     );
   }
