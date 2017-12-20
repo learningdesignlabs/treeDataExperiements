@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Meteor } from 'meteor/meteor';
 import { withTracker } from 'meteor/react-meteor-data';
-import SortableTree, { getFlatDataFromTree } from 'react-sortable-tree';
+import SortableTree, { getFlatDataFromTree, getTreeFromFlatData } from 'react-sortable-tree';
 
 import { Features } from '/imports/api/Features/features.js';
 
@@ -67,8 +67,7 @@ class Tree extends Component {
               <button
                 style={{ verticalAlign: 'middle' }}
                 onClick={() => alertNodeInfo(rowInfo)}
-              >
-                i
+              > i
               </button>,
             ],
           })}
@@ -81,6 +80,7 @@ class Tree extends Component {
 
 // create a container using withTracker to pass the features Collection
 // as a props to the Tree component
+/*
 export default withTracker(() => {
   const featuresHandle = Meteor.subscribe('features');
   const loading = !featuresHandle.ready();
@@ -90,4 +90,29 @@ export default withTracker(() => {
     featuresExists,
     features: featuresExists ? Features.find().fetch() : [],
   };
+})(Tree);
+*/
+
+
+export default withTracker(() => {
+  const featuresHandle = Meteor.subscribe('features');
+  const loading = !featuresHandle.ready();
+  const featuresExists = !loading;
+  return {
+    loading,
+    featuresExists,
+    features: featuresExists ? (getTreeFromFlatData(
+      {
+
+        flatData: Features.find().fetch(),
+        getKey: node => node.id, // resolve a node's key
+        getParentKey: node => node.parent, // resolve a node's parent's key
+
+        rootKey: null // The value of the parent key when there is no parent (i.e., at root level)
+      }
+    )) : [],
+  };
+
+
+
 })(Tree);
