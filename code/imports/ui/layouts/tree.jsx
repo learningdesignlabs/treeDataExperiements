@@ -35,7 +35,7 @@ class Tree extends Component {
     // flat data variable using the getFlatDataFromTree function passed to input value on line 55.
     const flatData = getFlatDataFromTree({
       treeData: this.state.features,
-      getNodeKey: ({ node }) => node.id,
+      getNodeKey: ({ node }) => node._id,
       ignoreCollapsed: false,
     }).map(({ node, path }, index) => ({
       id: node._id,
@@ -104,7 +104,7 @@ export default withTracker(() => {
       {
 
         flatData: Features.find().fetch(),
-        getKey: node => node.id, // resolve a node's key
+        getKey: node => node._id, // resolve a node's key
         getParentKey: node => node.parent, // resolve a node's parent's key
 
         rootKey: null // The value of the parent key when there is no parent (i.e., at root level)
