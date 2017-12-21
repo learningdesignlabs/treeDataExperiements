@@ -3,7 +3,7 @@ import { Meteor } from 'meteor/meteor';
 import { withTracker } from 'meteor/react-meteor-data';
 import SortableTree, { getFlatDataFromTree, getTreeFromFlatData } from 'react-sortable-tree';
 
-import { Features } from '/imports/api/Features/features.js';
+import { Features, FeaturesUserPreferences } from '/imports/api/Features/features.js';
 
 class Tree extends Component {
   constructor(props) {
@@ -60,9 +60,32 @@ class Tree extends Component {
           treeData={this.state.features}
           onChange={(features) => {
             this.setState({features});
+
+            // Update FeaturesUserPreferences for this user
+            // FUTURE: WHEN ACCOUNTS IS INSTALLED, ADD this.userId AS PART
+            // OF THIS UPDATE
+            //
+            //Meteor.call('updateFeaturesUserPreferences', 'currentUserId', features);
+
             console.log("treeData is", features);
           }}
           generateNodeProps={rowInfo => ({
+            onClick: (event) => {
+
+              const collapseClicked = event.target.className == "rst__collapseButton";
+              const expandClicked = event.target.className == "rst__expandButton";
+
+              if(collapseClicked){
+            //    console.log("You just collapsed the ", rowInfo.node.title, " node with the id of ", rowInfo.node._id);
+                Meteor.call('updateFeaturesUserPreferences', 'currentUserId', {featureId: rowInfo.node._id, expanded:false});
+              }
+
+              if(expandClicked){
+          //      console.log("You just collapsed the ", rowInfo.node.title, " node with the id of ", rowInfo.node._id);
+                Meteor.call('updateFeaturesUserPreferences', 'currentUserId', {featureId: rowInfo.node._id, expanded:true});
+              }
+
+            } ,
             buttons: [
               <button
                 style={{ verticalAlign: 'middle' }}
@@ -84,6 +107,8 @@ export default withTracker(() => {
   const featuresHandle = Meteor.subscribe('features');
   const loading = !featuresHandle.ready();
   const featuresExists = !loading;
+
+
   return {
     loading,
     featuresExists,
@@ -97,13 +122,46 @@ export default withTracker(() => {
   const featuresHandle = Meteor.subscribe('features');
   const loading = !featuresHandle.ready();
   const featuresExists = !loading;
+
+  const featuresUserPreferencesHandle = Meteor.subscribe('featuresUserPreferences');
+
+
+  // Find all expanded nodes saved as a feature user preference
+  // FUTURE: ONCE ACCOUNTS ARE SET UP, FILTER RETURNED DOCS BY THIS USER ID
+  //
+
+  // Ensure features tree returned from subscription has the appropriate nodes
+  // expanded
+
+  let flatTreeData = Features.find({},{
+    transform: (treeNode) =>{
+
+      // Check the document to see if it's expanded before returning it to the
+      // mongo cursor
+      console.log("Looking at node:", treeNode);
+
+      let expandedNode = FeaturesUserPreferences.findOne({userId: 'currentUserId', featureId: treeNode._id, expanded: true});
+      if(expandedNode){
+        console.log("found expanded node")
+
+        treeNode.expanded = true;
+      }
+      else{
+        console.log("did not find any expanded nodes");
+      }
+
+      return treeNode; // transformation operation successful
+    }
+  }).fetch();
+
+
+
   return {
     loading,
     featuresExists,
     features: featuresExists ? (getTreeFromFlatData(
       {
-
-        flatData: Features.find().fetch(),
+        flatData: flatTreeData,
         getKey: node => node._id, // resolve a node's key
         getParentKey: node => node.parent, // resolve a node's parent's key
 
