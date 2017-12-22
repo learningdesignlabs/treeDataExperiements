@@ -1,14 +1,11 @@
 import React, { Component } from 'react';
 import { Meteor } from 'meteor/meteor';
-import { withTracker } from 'meteor/react-meteor-data';
-import SortableTree, { getFlatDataFromTree, getTreeFromFlatData } from 'react-sortable-tree';
+import SortableTree, { getFlatDataFromTree } from 'react-sortable-tree';
 
-import { Features } from '/imports/api/Features/features.js';
 
-class Tree extends Component {
+export default class Tree extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       features: props.features,
     };
@@ -35,7 +32,7 @@ class Tree extends Component {
     // flat data variable using the getFlatDataFromTree function passed to input value on line 55.
     const flatData = getFlatDataFromTree({
       treeData: this.state.features,
-      getNodeKey: ({ node }) => node.id,
+      getNodeKey: ({ node }) => node._id,
       ignoreCollapsed: false,
     }).map(({ node, path }, index) => ({
       id: node._id,
@@ -63,6 +60,20 @@ class Tree extends Component {
             // console.log('treeData is', features);
           }}
           generateNodeProps={rowInfo => ({
+            onClick: (event) => {
+              const collapseClicked = event.target.className === 'rst__collapseButton';
+              const expandClicked = event.target.className === 'rst__expandButton';
+
+              if (collapseClicked) {
+// console.log('You just collapsed the ', rowInfo.node.title, ' node with the id of ', rowInfo.node_id);
+                Meteor.call('updateFeaturesUsersPreferences', 'currentId', { featureId: rowInfo.node._id, expanded: false });
+              }
+
+              if (expandClicked) {
+// console.log('You just expanded the ', rowInfo.node.title, ' node with the id of ', rowInfo.node._id);
+                Meteor.call('updateFeaturesUsersPreferences', 'currentId', { featureId: rowInfo.node._id, expanded: true });
+              }
+            },
             buttons: [
               <button
                 style={{ verticalAlign: 'middle' }}
@@ -77,42 +88,3 @@ class Tree extends Component {
     );
   }
 }
-
-// create a container using withTracker to pass the features Collection
-// as a props to the Tree component
-/*
-export default withTracker(() => {
-  const featuresHandle = Meteor.subscribe('features');
-  const loading = !featuresHandle.ready();
-  const featuresExists = !loading;
-  return {
-    loading,
-    featuresExists,
-    features: featuresExists ? Features.find().fetch() : [],
-  };
-})(Tree);
-*/
-
-
-export default withTracker(() => {
-  const featuresHandle = Meteor.subscribe('features');
-  const loading = !featuresHandle.ready();
-  const featuresExists = !loading;
-  return {
-    loading,
-    featuresExists,
-    features: featuresExists ? (getTreeFromFlatData(
-      {
-
-        flatData: Features.find().fetch(),
-        getKey: node => node.id, // resolve a node's key
-        getParentKey: node => node.parent, // resolve a node's parent's key
-
-        rootKey: null // The value of the parent key when there is no parent (i.e., at root level)
-      }
-    )) : [],
-  };
-
-
-
-})(Tree);

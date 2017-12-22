@@ -4,8 +4,8 @@ import { render } from 'react-dom';
 
 // Refactor - render routes instead. app layout to move to a container component
 // Also changed name of App component to Tree for experiment only
-import Tree from '../imports/ui/layouts/tree.jsx';
+import AppContainer from '../imports/ui/containers/AppContainer.jsx';
 
 Meteor.startup(() => {
-  render(<Tree />, document.getElementById('render-target'));
+  render(<AppContainer />, document.getElementById('render-target'));
 });

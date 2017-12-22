@@ -1,6 +1,10 @@
 import { Meteor } from 'meteor/meteor';
-import { Features } from '/imports/api/Features/features.js';
+import { Features, FeaturesUserPreferences } from '/imports/api/Features/features.js';
 
-Meteor.publish('features', function() {
+Meteor.publish('featuresPub', function() {
   return Features.find({});
+});
+
+Meteor.publish('featuresUserPreferencesPub', function() {
+  return FeaturesUserPreferences.find({});
 });
