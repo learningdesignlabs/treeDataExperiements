@@ -9,6 +9,18 @@ const treeData = [
 ];
 */
 
+/*
+const treeData = [
+  { title: 'Dog', parent: null },
+  { title: 'Shiba Inu', parent: 'null' },
+  { title: 'Feline', parent: null },
+  { title: 'Tiger', parent: null },
+  { title: 'House Cat', parent: null },
+  { title: 'Chicken', parent: null },
+  { title: 'Human', parent: null },
+];
+*/
+
 const treeData = [
   { title: 'Dog', parent: null },
   { title: 'Shiba Inu', parent: 'null' },
