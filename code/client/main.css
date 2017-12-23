@@ -1,5 +1,26 @@
 /* CSS declarations go here */
-
 #render-target {
-  padding: 70px;
+  margin: 8px;
+}
+.container {
+  display: grid;
+  grid-template-columns: 40px 40px auto 200px 200px 40px 40px;
+  grid-template-rows: 25% 100px auto;
+}
+
+.treeView {
+  grid-column-start: 3;
+  grid-column-end: 4;
+  grid-row-start: 2;
+  grid-row-end: 4;
+  height: 600px;
+  background-color: #eaffd0;
+}
+
+.detailsView {
+  grid-column-start: 4;
+  grid-column-end: 6;
+  grid-row-start: 2;
+  grid-row-end: 4;
+  background-color: #fffdd0;
 }
